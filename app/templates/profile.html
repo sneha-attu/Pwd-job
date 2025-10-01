@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - PWD Job Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Accessibility Toolbar -->
+    <div class="bg-dark text-white py-2 sticky-top">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-light">A+</button>
+                    <button class="btn btn-sm btn-outline-light">A-</button>
+                    <button class="btn btn-sm btn-outline-light">High Contrast</button>
+                </div>
+                <span>Welcome, {{ current_user.username }}!</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/dashboard">
+                <i class="fas fa-universal-access"></i> PWD Job Portal
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link btn btn-outline-light me-2" href="/dashboard">
+                    <i class="fas fa-arrow-left"></i> BACK TO DASHBOARD
+                </a>
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+                <a class="nav-link" href="/jobs">Jobs</a>
+                <a class="nav-link active" href="/profile">Profile</a>
+                <a class="nav-link text-warning" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Header with Back Button -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2 mb-0">My Profile</h1>
+            <a href="/dashboard" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left"></i> BACK TO DASHBOARD
+            </a>
+        </div>
+        
+        <div class="row">
+            <!-- Profile Info Card -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-user"></i> Profile Information</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-user-circle fa-5x text-primary"></i>
+                        </div>
+                        <h4 class="card-title">{{ current_user.username }}</h4>
+                        <p class="text-muted">{{ current_user.email }}</p>
+                        
+                        <div class="mb-3">
+                            <span class="badge bg-primary fs-6">
+                                {{ current_user.user_type.title().replace('_', ' ') }}
+                            </span>
+                        </div>
+                        
+                        {% if current_user.disability_type %}
+                        <div class="mb-3">
+                            <span class="badge bg-info">
+                                <i class="fas fa-universal-access"></i> 
+                                {{ current_user.disability_type.title() }} Support
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> 
+                            Member since {{ current_user.created_at.strftime('%B %Y') }}
+                        </small>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <a href="/dashboard" class="btn btn-primary btn-sm w-100 mb-2">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        {% if current_user.user_type == 'job_seeker' %}
+                            <a href="/jobs" class="btn btn-success btn-sm w-100 mb-2">
+                                <i class="fas fa-search"></i> Browse Jobs
+                            </a>
+                        {% else %}
+                            <a href="/post-job" class="btn btn-success btn-sm w-100 mb-2">
+                                <i class="fas fa-plus-circle"></i> Post New Job
+                            </a>
+                        {% endif %}
+                        <a href="/logout" class="btn btn-outline-danger btn-sm w-100">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="col-md-8">
+                {% if current_user.user_type == 'job_seeker' %}
+                <!-- Job Seeker: My Applications -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-alt"></i> My Job Applications
+                        </h5>
+                        <span class="badge bg-primary">{{ applications|length }}</span>
+                    </div>
+                    <div class="card-body">
+                        {% if applications %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Job Title</th>
+                                            <th>Company</th>
+                                            <th>Applied Date</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for application in applications %}
+                                        <tr>
+                                            <td><strong>{{ application.job.title }}</strong></td>
+                                            <td>{{ application.job.company }}</td>
+                                            <td>{{ application.applied_at.strftime('%b %d, %Y') }}</td>
+                                            <td>
+                                                <span class="badge bg-warning">{{ application.status.title() }}</span>
+                                            </td>
+                                            <td>
+                                                <a href="/job/{{ application.job.id }}" class="btn btn-sm btn-outline-primary">
+                                                    View Job
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No Applications Yet</h5>
+                                <p class="text-muted">Start applying to accessible jobs to see your applications here.</p>
+                                <a href="/jobs" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Browse Available Jobs
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% else %}
+                <!-- Employer: My Posted Jobs -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-briefcase"></i> My Posted Jobs
+                        </h5>
+                        <div>
+                            <span class="badge bg-success">{{ jobs|length }}</span>
+                            <a href="/post-job" class="btn btn-success btn-sm ms-2">
+                                <i class="fas fa-plus"></i> Post New Job
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if jobs %}
+                            <div class="row">
+                                {% for job in jobs %}
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ job.title }}</h6>
+                                            <p class="card-subtitle text-muted mb-2">{{ job.company }}</p>
+                                            <p class="card-text small">{{ job.description[:100] }}...</p>
+                                            
+                                            {% if job.accessibility_features %}
+                                            <div class="mb-2">
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-wheelchair"></i> Accessible
+                                                </span>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    Posted {{ job.created_at.strftime('%b %d') }}
+                                                </small>
+                                                <a href="/job/{{ job.id }}" class="btn btn-outline-primary btn-sm">
+                                                    View Details
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No Jobs Posted</h5>
+                                <p class="text-muted">Post your first accessible job to connect with talented PWD candidates.</p>
+                                <a href="/post-job" class="btn btn-success">
+                                    <i class="fas fa-plus-circle"></i> Post Your First Job
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Accessibility Preferences -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-universal-access"></i> Accessibility Preferences
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Account Type:</strong> {{ current_user.user_type.title().replace('_', ' ') }}</p>
+                                {% if current_user.disability_type %}
+                                <p><strong>Primary Disability:</strong> {{ current_user.disability_type.title() }}</p>
+                                {% endif %}
+                                <p><strong>Email:</strong> {{ current_user.email }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Accessibility Features:</strong></p>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <span class="badge bg-primary">Screen Reader Ready</span>
+                                    <span class="badge bg-success">High Contrast</span>
+                                    <span class="badge bg-info">Keyboard Navigation</span>
+                                    <span class="badge bg-warning">Large Text</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Back Button -->
+        <div class="text-center mt-5">
+            <a href="/dashboard" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left"></i> BACK TO DASHBOARD
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

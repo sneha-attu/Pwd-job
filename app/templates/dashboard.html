@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PWD Job Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">PWD Job Portal</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.jobs') }}">Jobs</a>
+                    </li>
+                    {% if current_user.user_type == 'job_seeker' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.job_matching_game') }}">Matching Game</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.my_matches') }}">My Matches</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.my_applications') }}">Applications</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Welcome, {{ current_user.username }}!</h4>
+            <p>Your PWD Job Portal Dashboard is ready and working!</p>
+        </div>
+
+        <!-- Existing Dashboard Stats Row -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ total_jobs }}</h5>
+                        <p class="card-text">Available Jobs</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ my_applications if current_user.user_type == 'job_seeker' else my_jobs }}</h5>
+                        <p class="card-text">{{ 'My Applications' if current_user.user_type == 'job_seeker' else 'Jobs Posted' }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">✅</h5>
+                        <p class="card-text">Accessibility Features</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ current_user.user_type.title().replace('_', ' ') }}</h5>
+                        <p class="card-text">Account Type</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+    <div class="card-body">
+        <h5>📝 Complete Profile</h5>
+        <p>Update your skills and preferences</p>
+        <a href="{{ url_for('main.complete_profile') }}" class="btn btn-warning">Complete Profile</a>
+    </div>
+</div>
+
+        <!-- NEW JOB MATCHING FEATURES ROW -->
+        {% if current_user.user_type == 'job_seeker' %}
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card border-primary">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-bullseye" style="font-size: 3rem; color: #007bff;"></i>
+                        </div>
+                        <h5 class="card-title">🎯 Job Matching Game</h5>
+                        <p class="card-text">Find your perfect job matches with our AI-powered matching system</p>
+                        {% if current_user.skills %}
+                            <a href="{{ url_for('main.job_matching_game') }}" class="btn btn-primary">Start Matching Game</a>
+                            <small class="d-block mt-2 text-muted">Based on your profile</small>
+                        {% else %}
+                            <a href="{{ url_for('main.complete_profile') }}" class="btn btn-warning">Complete Profile First</a>
+                            <small class="d-block mt-2 text-muted">Complete your profile to get matches</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-heart" style="font-size: 3rem; color: #28a745;"></i>
+                        </div>
+                        <h5 class="card-title">❤️ My Matches</h5>
+                        <p class="card-text">View and manage your job matches, liked jobs, and applications</p>
+                        <a href="{{ url_for('main.my_matches') }}" class="btn btn-outline-success">View My Matches</a>
+                        {% if my_matches %}
+                            <small class="d-block mt-2 text-success">{{ my_matches }} matches found</small>
+                        {% else %}
+                            <small class="d-block mt-2 text-muted">No matches yet</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-file-alt" style="font-size: 3rem; color: #17a2b8;"></i>
+                        </div>
+                        <h5 class="card-title">📋 My Applications</h5>
+                        <p class="card-text">Track your job applications and their status</p>
+                        <a href="{{ url_for('main.my_applications') }}" class="btn btn-outline-info">View Applications</a>
+                        {% if my_applications %}
+                            <small class="d-block mt-2 text-info">{{ my_applications }} applications</small>
+                        {% else %}
+                            <small class="d-block mt-2 text-muted">No applications yet</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW MATCHING GAME QUICK ACCESS -->
+        {% if show_matching_card and pending_matches %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-light border-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">🎮 Continue Your Matching Game</h5>
+                        <p class="card-text">You have {{ pending_matches|length }} pending job matches waiting for your review!</p>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('main.job_matching_game') }}" class="btn btn-primary">Continue Matching</a>
+                            <a href="{{ url_for('main.my_matches') }}" class="btn btn-outline-primary">View All Matches</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <!-- Existing User Profile Section -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Recent Jobs</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_jobs %}
+                            {% for job in recent_jobs %}
+                                <div class="mb-3 p-3 border rounded">
+                                    <h6>{{ job.title }}</h6>
+                                    <p class="text-muted mb-1">{{ job.company }}</p>
+                                    <p class="small">{{ job.description[:80] }}...{% if job.accessibility_features %} <span class="badge bg-success">PWD Friendly</span> {% endif %}</p>
+                                    <a href="{{ url_for('main.job_detail', id=job.id) }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">Sample jobs will be created automatically.</p>
+                            <a href="{{ url_for('main.create_demo') }}" class="btn btn-outline-primary">Create Sample Jobs</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Account Info</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Email:</strong> {{ current_user.email }}</p>
+                        {% if current_user.disability_type %}
+                            <p><strong>Disability Support:</strong> {{ current_user.disability_type.title() }}</p>
+                        {% endif %}
+                        <p><strong>Account Type:</strong> {{ current_user.user_type.title().replace('_', ' ') }}</p>
+                        <a href="{{ url_for('main.profile') }}" class="btn btn-outline-primary btn-sm">View Full Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+</body>
+</html>

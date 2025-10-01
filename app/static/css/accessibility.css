@@ -1,0 +1,122 @@
+/* Accessibility CSS for PWD Job Portal */
+
+/* Skip Navigation Link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: #000;
+    color: #fff;
+    padding: 8px;
+    z-index: 1000;
+    text-decoration: none;
+    border-radius: 0 0 4px 4px;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* High Contrast Mode */
+.high-contrast {
+    background: #000 !important;
+    color: #fff !important;
+}
+
+.high-contrast .card {
+    background: #333 !important;
+    border: 2px solid #fff !important;
+    color: #fff !important;
+}
+
+.high-contrast .btn-primary {
+    background: #fff !important;
+    color: #000 !important;
+    border: 2px solid #fff !important;
+}
+
+.high-contrast .navbar {
+    background: #222 !important;
+    border-bottom: 2px solid #fff !important;
+}
+
+.high-contrast .nav-link {
+    color: #fff !important;
+}
+
+/* Font Size Controls */
+.font-large {
+    font-size: 1.25em !important;
+}
+
+.font-extra-large {
+    font-size: 1.5em !important;
+}
+
+/* Focus Indicators */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+a:focus {
+    outline: 3px solid #005fcc !important;
+    outline-offset: 2px !important;
+}
+
+/* Large Click Targets */
+.btn {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px 20px;
+}
+
+.form-control,
+.form-select {
+    min-height: 48px;
+    font-size: 1.1em;
+}
+
+/* Screen Reader Only Content */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.sr-only-focusable:focus {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0.25rem 0.5rem !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: normal !important;
+}
+
+/* Animation Controls */
+.reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
+/* Voice Navigation Indicator */
+.voice-active {
+    border: 3px solid #ff6b6b !important;
+    background: rgba(255, 107, 107, 0.1) !important;
+}
+
+/* Text-to-Speech Highlighting */
+.tts-highlight {
+    background: #ffeb3b !important;
+    color: #000 !important;
+    padding: 2px 4px;
+    border-radius: 3px;
+}

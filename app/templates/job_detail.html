@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ job.title }} - PWD Job Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/dashboard">
+                <i class="fas fa-universal-access"></i> PWD Job Portal
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link btn btn-outline-light me-2" href="/jobs">
+                    <i class="fas fa-arrow-left"></i> Back to Jobs
+                </a>
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+                <a class="nav-link" href="/jobs">Jobs</a>
+                <a class="nav-link" href="/profile">Profile</a>
+                <a class="nav-link text-warning" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Back Button -->
+        <div class="mb-4">
+            <a href="/jobs" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to All Jobs
+            </a>
+        </div>
+
+        <!-- Job Header Card -->
+        <div class="card mb-4 shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="h3 mb-1">{{ job.title }}</h1>
+                        <h2 class="h5 mb-0 opacity-75">{{ job.company }}</h2>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        {% if job.accessibility_features %}
+                        <span class="badge bg-success fs-6 mb-2">
+                            <i class="fas fa-wheelchair"></i> PWD Friendly Job
+                        </span>
+                        {% endif %}
+                        <div class="small">Job ID: #{{ job.id }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if job.location %}
+                    <div class="col-md-6 mb-2">
+                        <i class="fas fa-map-marker-alt text-primary"></i>
+                        <strong>Location:</strong> {{ job.location }}
+                    </div>
+                    {% endif %}
+                    {% if job.salary_range %}
+                    <div class="col-md-6 mb-2">
+                        <i class="fas fa-dollar-sign text-success"></i>
+                        <strong>Salary:</strong> {{ job.salary_range }}
+                    </div>
+                    {% endif %}
+                    <div class="col-md-6 mb-2">
+                        <i class="fas fa-calendar text-info"></i>
+                        <strong>Posted:</strong> {{ job.created_at.strftime('%B %d, %Y') }}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <i class="fas fa-building text-secondary"></i>
+                        <strong>Posted by:</strong> {{ job.employer.username }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Job Details -->
+            <div class="col-lg-8">
+                <!-- Job Description Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="h5 mb-0">
+                                <i class="fas fa-file-alt text-primary"></i> Job Description
+                            </h3>
+                            <!-- Text-to-Speech Button for Visually Disabled -->
+                            <div class="text-to-speech-controls">
+                                <button id="playJobDescription" class="btn btn-success btn-sm me-2" onclick="readJobDescription()">
+                                    <i class="fas fa-play"></i> <i class="fas fa-volume-up"></i> Listen to Job Description
+                                </button>
+                                <button id="stopJobDescription" class="btn btn-danger btn-sm" onclick="stopReading()" style="display: none;">
+                                    <i class="fas fa-stop"></i> Stop Reading
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-1">
+                            <i class="fas fa-universal-access"></i> 
+                            Click "Listen to Job Description" to hear the complete job details read aloud
+                        </small>
+                    </div>
+                    <div class="card-body">
+                        <div class="job-description" id="jobDescriptionContent" style="line-height: 1.8; font-size: 16px;">
+                            {{ job.description | replace('\n', '<br>') | safe }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requirements Section -->
+                {% if job.requirements %}
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="h5 mb-0">
+                                <i class="fas fa-check-circle text-success"></i> Requirements & Qualifications
+                            </h3>
+                            <button class="btn btn-info btn-sm" onclick="readRequirements()">
+                                <i class="fas fa-play"></i> <i class="fas fa-volume-up"></i> Listen to Requirements
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="requirements" id="requirementsContent" style="line-height: 1.8; font-size: 16px;">
+                            {{ job.requirements | replace('\n', '<br>') | safe }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Disability Support & Accessibility Section -->
+                {% if job.accessibility_features %}
+                <div class="card mb-4 border-success">
+                    <div class="card-header bg-success text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="h5 mb-0">
+                                <i class="fas fa-wheelchair"></i> Disability Support & Accessibility Features
+                            </h3>
+                            <button class="btn btn-light btn-sm" onclick="readAccessibilityFeatures()">
+                                <i class="fas fa-play text-success"></i> <i class="fas fa-volume-up text-success"></i> Listen to Features
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-success mb-3">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle"></i> This Job Welcomes People with Disabilities
+                            </h6>
+                            <p class="mb-0">The employer has committed to providing accessibility features and reasonable accommodations.</p>
+                        </div>
+                        
+                        <h6 class="text-success mb-3">Available Accommodations:</h6>
+                        <div class="accessibility-features" id="accessibilityContent" style="line-height: 1.8; font-size: 16px;">
+                            {{ job.accessibility_features | replace('\n', '<br>') | safe }}
+                        </div>
+                        
+                        <!-- Disability Types Supported -->
+                        <div class="mt-4">
+                            <h6 class="text-success mb-3">Disability Types Supported:</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <i class="fas fa-eye text-primary"></i> <strong>Visual Disabilities</strong>
+                                    <div class="small text-muted">Screen reader support, large text, high contrast</div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <i class="fas fa-deaf text-info"></i> <strong>Hearing Disabilities</strong>
+                                    <div class="small text-muted">Visual alerts, captioning, sign language</div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <i class="fas fa-wheelchair text-warning"></i> <strong>Mobility Disabilities</strong>
+                                    <div class="small text-muted">Accessible workspace, flexible arrangements</div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <i class="fas fa-brain text-success"></i> <strong>Cognitive Disabilities</strong>
+                                    <div class="small text-muted">Clear instructions, flexible schedules</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Apply Now Card -->
+                <div class="card mb-4 sticky-top" style="top: 20px;">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4 class="mb-0">Ready to Apply?</h4>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.user_type == 'job_seeker' %}
+                                {% if already_applied %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-check-circle"></i>
+                                        <strong>Already Applied!</strong><br>
+                                        <small>Check your profile for application status.</small>
+                                    </div>
+                                    <a href="/profile" class="btn btn-outline-primary w-100">
+                                        View My Applications
+                                    </a>
+                                {% else %}
+                                    <p class="mb-3">Take the next step in your accessible career!</p>
+                                    <!-- APPLY NOW BUTTON -->
+                                    <a href="/apply/{{ job.id }}" class="btn btn-success btn-lg w-100 mb-3">
+                                        <i class="fas fa-paper-plane"></i> APPLY NOW
+                                    </a>
+                                    <small class="text-muted">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Your disability accommodation requests will be handled confidentially.
+                                    </small>
+                                {% endif %}
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Employer Account</strong><br>
+                                    Only job seekers can apply for positions.
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="mb-3">Sign in to apply for this accessible position.</p>
+                            <a href="/login" class="btn btn-primary btn-lg w-100 mb-2">
+                                <i class="fas fa-sign-in-alt"></i> Sign In to Apply
+                            </a>
+                            <a href="/register" class="btn btn-outline-primary w-100 mb-3">
+                                <i class="fas fa-user-plus"></i> Create Account
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Job Summary Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Job Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong>Company:</strong><br>
+                            <span class="text-muted">{{ job.company }}</span>
+                        </div>
+                        {% if job.location %}
+                        <div class="mb-3">
+                            <strong>Location:</strong><br>
+                            <span class="text-muted">{{ job.location }}</span>
+                        </div>
+                        {% endif %}
+                        {% if job.salary_range %}
+                        <div class="mb-3">
+                            <strong>Salary:</strong><br>
+                            <span class="text-muted">{{ job.salary_range }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <strong>Posted:</strong><br>
+                            <span class="text-muted">{{ job.created_at.strftime('%B %d, %Y') }}</span>
+                        </div>
+                        {% if job.accessibility_features %}
+                        <div class="mb-0">
+                            <span class="badge bg-success w-100">
+                                <i class="fas fa-wheelchair"></i> PWD Accessible
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="text-center mt-5 mb-4">
+            <a href="/jobs" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-arrow-left"></i> Back to All Jobs
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    // Text-to-Speech functionality for visually disabled users
+    let currentSpeech = null;
+    let isReading = false;
+
+    function readJobDescription() {
+        if (isReading) {
+            stopReading();
+            return;
+        }
+        
+        // Get job description content
+        const jobTitle = "{{ job.title }}";
+        const jobCompany = "{{ job.company }}";
+        const jobDescription = document.getElementById('jobDescriptionContent').innerText;
+        
+        // Create complete text to read
+        const fullText = `Job Title: ${jobTitle}. Company: ${jobCompany}. Job Description: ${jobDescription}`;
+        
+        // Start reading
+        readText(fullText, 'jobDescription');
+    }
+
+    function readRequirements() {
+        if (isReading) {
+            stopReading();
+            return;
+        }
+        
+        const requirementsContent = document.getElementById('requirementsContent').innerText;
+        const fullText = `Job Requirements and Qualifications: ${requirementsContent}`;
+        
+        readText(fullText, 'requirements');
+    }
+
+    function readAccessibilityFeatures() {
+        if (isReading) {
+            stopReading();
+            return;
+        }
+        
+        const accessibilityContent = document.getElementById('accessibilityContent').innerText;
+        const fullText = `Accessibility Features and Accommodations: ${accessibilityContent}`;
+        
+        readText(fullText, 'accessibility');
+    }
+
+    function readText(text, section) {
+        if ('speechSynthesis' in window) {
+            // Stop any current speech
+            window.speechSynthesis.cancel();
+            
+            // Create new speech
+            currentSpeech = new SpeechSynthesisUtterance(text);
+            
+            // Configure speech settings
+            currentSpeech.rate = 0.8; // Slightly slower for better comprehension
+            currentSpeech.pitch = 1.0;
+            currentSpeech.volume = 1.0;
+            
+            // Try to use a high-quality voice
+            const voices = window.speechSynthesis.getVoices();
+            const preferredVoice = voices.find(voice => 
+                voice.lang.startsWith('en') && 
+                (voice.name.includes('Natural') || voice.name.includes('Enhanced'))
+            ) || voices.find(voice => voice.lang.startsWith('en'));
+            
+            if (preferredVoice) {
+                currentSpeech.voice = preferredVoice;
+            }
+            
+            // Event handlers
+            currentSpeech.onstart = function() {
+                isReading = true;
+                updateButtonStates(true);
+                console.log('Started reading job description');
+            };
+            
+            currentSpeech.onend = function() {
+                isReading = false;
+                updateButtonStates(false);
+                console.log('Finished reading job description');
+            };
+            
+            currentSpeech.onerror = function(event) {
+                console.error('Speech synthesis error:', event.error);
+                isReading = false;
+                updateButtonStates(false);
+                alert('Unable to read text aloud. Please check your browser settings.');
+            };
+            
+            // Start speaking
+            window.speechSynthesis.speak(currentSpeech);
+            
+        } else {
+            alert('Text-to-speech is not supported in your browser. Please use a modern browser like Chrome, Firefox, or Edge.');
+        }
+    }
+
+    function stopReading() {
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        isReading = false;
+        updateButtonStates(false);
+    }
+
+    function updateButtonStates(reading) {
+        const playButton = document.getElementById('playJobDescription');
+        const stopButton = document.getElementById('stopJobDescription');
+        
+        if (reading) {
+            playButton.style.display = 'none';
+            stopButton.style.display = 'inline-block';
+        } else {
+            playButton.style.display = 'inline-block';
+            stopButton.style.display = 'none';
+        }
+    }
+
+    // Load voices when available (some browsers load them asynchronously)
+    window.speechSynthesis.onvoiceschanged = function() {
+        console.log('Voices loaded:', window.speechSynthesis.getVoices().length);
+    };
+
+    // Accessibility: Allow keyboard control
+    document.addEventListener('keydown', function(event) {
+        // Press 'R' to read job description
+        if (event.key.toLowerCase() === 'r' && event.ctrlKey) {
+            event.preventDefault();
+            readJobDescription();
+        }
+        // Press 'S' to stop reading
+        if (event.key.toLowerCase() === 's' && event.ctrlKey) {
+            event.preventDefault();
+            stopReading();
+        }
+    });
+
+    // Visual feedback for screen readers
+    function announceToScreenReader(message) {
+        const announcement = document.createElement('div');
+        announcement.setAttribute('aria-live', 'polite');
+        announcement.setAttribute('aria-atomic', 'true');
+        announcement.className = 'sr-only';
+        announcement.textContent = message;
+        document.body.appendChild(announcement);
+        
+        setTimeout(() => {
+            document.body.removeChild(announcement);
+        }, 1000);
+    }
+    </script>
+    
+    <style>
+        .job-description, .requirements, .accessibility-features {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        
+        .card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .btn-lg {
+            font-size: 1.1rem;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .sticky-top {
+            z-index: 1020;
+        }
+
+        /* Visual feedback for text-to-speech */
+        .text-to-speech-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn:focus {
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Highlight sections while reading */
+        .reading-highlight {
+            background-color: #fff3cd;
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</body>
+</html>

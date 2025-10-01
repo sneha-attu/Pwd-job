@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for {{ job.title }} - PWD Job Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/dashboard">
+                <i class="fas fa-universal-access"></i> PWD Job Portal
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/job/{{ job.id }}">← Back to Job</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Apply for: {{ job.title }}</h3>
+                        <p class="mb-0">{{ job.company }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Form -->
+        <form method="POST" id="applicationForm" enctype="multipart/form-data">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    
+                    <!-- SECTION 1: Basic Information -->
+                    <div class="card mb-4" id="section1">
+                        <div class="card-header bg-info text-white">
+                            <h4 class="mb-0"><i class="fas fa-user"></i> Basic Information</h4>
+                            <!-- ADDED: Speech-to-text instruction -->
+                            <small class="d-block mt-1">
+                                <i class="fas fa-microphone"></i> Use the microphone buttons to dictate your responses
+                            </small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Full Name *</label>
+                                    <!-- MODIFIED: Added microphone button -->
+                                    <div class="input-group">
+                                        <input type="text" class="form-control form-control-lg" name="full_name" id="fullNameInput" required>
+                                        <button type="button" class="btn btn-outline-success" onclick="startSpeechToText('fullNameInput')">
+                                            <i class="fas fa-microphone"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Phone Number *</label>
+                                    <!-- MODIFIED: Added microphone button -->
+                                    <div class="input-group">
+                                        <input type="tel" class="form-control form-control-lg" name="phone" id="phoneInput" required>
+                                        <button type="button" class="btn btn-outline-success" onclick="startSpeechToText('phoneInput')">
+                                            <i class="fas fa-microphone"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Years of Experience *</label>
+                                <select class="form-select form-select-lg" name="experience" required>
+                                    <option value="">Select experience level</option>
+                                    <option value="0-1">0-1 years</option>
+                                    <option value="1-3">1-3 years</option>
+                                    <option value="3-5">3-5 years</option>
+                                    <option value="5-10">5-10 years</option>
+                                    <option value="10+">10+ years</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <!-- MODIFIED: Added microphone button for textarea -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label fw-bold">Cover Letter / Why are you interested? *</label>
+                                    <div>
+                                        <button type="button" class="btn btn-success btn-sm me-2" onclick="startSpeechToText('coverLetterTextarea')" id="coverLetterMicBtn">
+                                            <i class="fas fa-microphone"></i> <span id="coverLetterMicText">Speak</span>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearText('coverLetterTextarea')">
+                                            <i class="fas fa-trash"></i> Clear
+                                        </button>
+                                    </div>
+                                </div>
+                                <textarea class="form-control" name="cover_letter" id="coverLetterTextarea" rows="4" placeholder="Tell us why you're interested in this position and what makes you a great fit... (or use the microphone to speak your response)" required></textarea>
+                                <!-- ADDED: Instruction text -->
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Click the microphone button and speak clearly. Your speech will be converted to text automatically.
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="button" class="btn btn-primary btn-lg" onclick="showDisabilitySection()">
+                                    Continue to Disability Support <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: Disability Support (Initially Hidden) -->
+                    <div class="card mb-4" id="section2" style="display: none;">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0"><i class="fas fa-wheelchair"></i> Disability Support & Accommodations</h4>
+                            <p class="mb-0 small">This information helps us provide the best workplace accommodations</p>
+                        </div>
+                        <div class="card-body">
+                            
+                            <!-- Disability Selection Based on Job -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Do you have any disabilities for which you need workplace accommodations?</label>
+                                <div class="alert alert-info">
+                                    <strong>This job supports the following disability types:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li><i class="fas fa-eye"></i> Visual Disabilities</li>
+                                        <li><i class="fas fa-deaf"></i> Hearing/Auditory Disabilities</li>
+                                        <li><i class="fas fa-wheelchair"></i> Mobility/Motor Disabilities</li>
+                                        <li><i class="fas fa-comments"></i> Speech Disabilities</li>
+                                        <li><i class="fas fa-brain"></i> Cognitive Disabilities</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="disability_type" value="visual" id="visual" onchange="toggleDisabilityDetails()">
+                                            <label class="form-check-label fw-bold" for="visual">
+                                                <i class="fas fa-eye text-primary"></i> Visual Disability
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="disability_type" value="auditory" id="auditory" onchange="toggleDisabilityDetails()">
+                                            <label class="form-check-label fw-bold" for="auditory">
+                                                <i class="fas fa-deaf text-info"></i> Hearing Disability
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="disability_type" value="mobility" id="mobility" onchange="toggleDisabilityDetails()">
+                                            <label class="form-check-label fw-bold" for="mobility">
+                                                <i class="fas fa-wheelchair text-warning"></i> Mobility Disability
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="disability_type" value="speech" id="speech" onchange="toggleDisabilityDetails()">
+                                            <label class="form-check-label fw-bold" for="speech">
+                                                <i class="fas fa-comments text-success"></i> Speech Disability
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="disability_type" value="cognitive" id="cognitive" onchange="toggleDisabilityDetails()">
+                                            <label class="form-check-label fw-bold" for="cognitive">
+                                                <i class="fas fa-brain text-secondary"></i> Cognitive Disability
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Disability-Specific Details -->
+                            <div id="disabilityDetails" style="display: none;">
+                                
+                                <!-- Visual Disability Details -->
+                                <div id="visualDetails" class="disability-section mb-4" style="display: none;">
+                                    <div class="card border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0"><i class="fas fa-eye"></i> Visual Disability Details</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Degree of Visual Impairment</label>
+                                                    <select class="form-select" name="visual_degree">
+                                                        <option value="">Select</option>
+                                                        <option value="blind">Blind</option>
+                                                        <option value="low_vision">Low Vision</option>
+                                                        <option value="legally_blind">Legally Blind</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Preferred Document Format</label>
+                                                    <select class="form-select" name="visual_format">
+                                                        <option value="">Select</option>
+                                                        <option value="braille">Braille</option>
+                                                        <option value="large_print">Large Print</option>
+                                                        <option value="audio">Audio</option>
+                                                        <option value="electronic">Electronic Text</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Assistive Technology Used</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="visual_tech" value="screen_reader">
+                                                            <label class="form-check-label">Screen Reader (JAWS, NVDA)</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="visual_tech" value="magnifier">
+                                                            <label class="form-check-label">Screen Magnifier</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="visual_tech" value="braille_display">
+                                                            <label class="form-check-label">Braille Display</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="visual_tech" value="high_contrast">
+                                                            <label class="form-check-label">High Contrast Display</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Auditory/Hearing Disability Details -->
+                                <div id="auditoryDetails" class="disability-section mb-4" style="display: none;">
+                                    <div class="card border-info">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0"><i class="fas fa-deaf"></i> Hearing Disability Details</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Degree of Hearing Loss</label>
+                                                    <select class="form-select" name="auditory_degree">
+                                                        <option value="">Select</option>
+                                                        <option value="deaf">Deaf</option>
+                                                        <option value="hard_of_hearing">Hard of Hearing</option>
+                                                        <option value="mild_loss">Mild Loss</option>
+                                                        <option value="severe_loss">Severe Loss</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Communication Method</label>
+                                                    <select class="form-select" name="auditory_communication">
+                                                        <option value="">Select</option>
+                                                        <option value="sign_language">Sign Language</option>
+                                                        <option value="lip_reading">Lip Reading</option>
+                                                        <option value="written">Written Communication</option>
+                                                        <option value="spoken">Spoken with Amplification</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Required Accommodations</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="auditory_acc" value="asl_interpreter">
+                                                            <label class="form-check-label">ASL Interpreter</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="auditory_acc" value="cart_services">
+                                                            <label class="form-check-label">CART (Real-time Captioning)</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="auditory_acc" value="hearing_loop">
+                                                            <label class="form-check-label">Hearing Loop System</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="auditory_acc" value="written_materials">
+                                                            <label class="form-check-label">Written Materials for Meetings</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mobility Disability Details -->
+                                <div id="mobilityDetails" class="disability-section mb-4" style="display: none;">
+                                    <div class="card border-warning">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h5 class="mb-0"><i class="fas fa-wheelchair"></i> Mobility Disability Details</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Mobility Aid Used</label>
+                                                    <select class="form-select" name="mobility_aid">
+                                                        <option value="">Select</option>
+                                                        <option value="wheelchair_manual">Manual Wheelchair</option>
+                                                        <option value="wheelchair_electric">Electric Wheelchair</option>
+                                                        <option value="walker">Walker</option>
+                                                        <option value="crutches">Crutches</option>
+                                                        <option value="prosthetics">Prosthetics</option>
+                                                        <option value="none">None</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Physical Limitations</label>
+                                                    <select class="form-select" name="mobility_limitation">
+                                                        <option value="">Select</option>
+                                                        <option value="upper_limb">Upper Limb</option>
+                                                        <option value="lower_limb">Lower Limb</option>
+                                                        <option value="full_body">Full Body</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Required Accommodations</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="mobility_acc" value="accessible_workspace">
+                                                            <label class="form-check-label">Accessible Workspace</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="mobility_acc" value="adjustable_desk">
+                                                            <label class="form-check-label">Adjustable Desk/Chair</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="mobility_acc" value="accessible_parking">
+                                                            <label class="form-check-label">Accessible Parking</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="mobility_acc" value="flexible_schedule">
+                                                            <label class="form-check-label">Flexible Work Schedule</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Speech Disability Details -->
+                                <div id="speechDetails" class="disability-section mb-4" style="display: none;">
+                                    <div class="card border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0"><i class="fas fa-comments"></i> Speech Disability Details</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Type of Speech Impairment</label>
+                                                    <select class="form-select" name="speech_type">
+                                                        <option value="">Select</option>
+                                                        <option value="articulation">Articulation Difficulty</option>
+                                                        <option value="voice_strength">Voice Strength Issues</option>
+                                                        <option value="language_processing">Language Processing</option>
+                                                        <option value="stuttering">Stuttering</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Preferred Communication</label>
+                                                    <select class="form-select" name="speech_communication">
+                                                        <option value="">Select</option>
+                                                        <option value="written">Written Communication</option>
+                                                        <option value="electronic">Electronic Devices</option>
+                                                        <option value="amplified">Voice Amplification</option>
+                                                        <option value="text_chat">Text Chat/Email</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Required Accommodations</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="speech_acc" value="extra_time">
+                                                            <label class="form-check-label">Extra Time for Responses</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="speech_acc" value="written_participation">
+                                                            <label class="form-check-label">Written Meeting Participation</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="speech_acc" value="amplification_device">
+                                                            <label class="form-check-label">Voice Amplification Device</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="speech_acc" value="email_communication">
+                                                            <label class="form-check-label">Email-based Communication</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cognitive Disability Details -->
+                                <div id="cognitiveDetails" class="disability-section mb-4" style="display: none;">
+                                    <div class="card border-secondary">
+                                        <div class="card-header bg-secondary text-white">
+                                            <h5 class="mb-0"><i class="fas fa-brain"></i> Cognitive Disability Details</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Type of Cognitive Condition</label>
+                                                    <select class="form-select" name="cognitive_type">
+                                                        <option value="">Select</option>
+                                                        <option value="learning_disability">Learning Disability</option>
+                                                        <option value="adhd">ADHD</option>
+                                                        <option value="autism">Autism Spectrum</option>
+                                                        <option value="intellectual">Intellectual Disability</option>
+                                                        <option value="memory">Memory Issues</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Main Functional Impact</label>
+                                                    <select class="form-select" name="cognitive_impact">
+                                                        <option value="">Select</option>
+                                                        <option value="memory">Memory/Recall</option>
+                                                        <option value="attention">Attention/Focus</option>
+                                                        <option value="processing">Processing Speed</option>
+                                                        <option value="social">Social Interaction</option>
+                                                        <option value="organization">Organization</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Required Accommodations</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="cognitive_acc" value="quiet_workspace">
+                                                            <label class="form-check-label">Quiet, Low-Distraction Workspace</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="cognitive_acc" value="written_instructions">
+                                                            <label class="form-check-label">Written Instructions & Checklists</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="cognitive_acc" value="flexible_schedule">
+                                                            <label class="form-check-label">Flexible Schedule & Breaks</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="cognitive_acc" value="routine_structure">
+                                                            <label class="form-check-label">Routine & Structured Tasks</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- PWD Certificate Upload Section -->
+                                <div class="card border-warning mb-4">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-certificate"></i> PWD Certificate Upload (Required)
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <label class="form-label fw-bold">
+                                                    <i class="fas fa-file-pdf text-danger"></i> Upload Your PWD Certificate *
+                                                </label>
+                                                <input 
+                                                    type="file" 
+                                                    class="form-control form-control-lg" 
+                                                    name="pwd_certificate" 
+                                                    id="pwdCertificateInput" 
+                                                    accept=".pdf"
+                                                    required
+                                                    onchange="validatePDFFile(this)"
+                                                >
+                                                <div class="form-text">
+                                                    <i class="fas fa-info-circle text-primary"></i> 
+                                                    <strong>Only PDF files are accepted.</strong> Maximum file size: 5MB
+                                                </div>
+                                                <div id="fileValidationMessage" class="mt-2" style="display: none;"></div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <div class="border rounded p-3 bg-light">
+                                                    <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
+                                                    <div class="small text-muted">
+                                                        <strong>Accepted Format:</strong><br>
+                                                        PDF files only<br>
+                                                        Max: 5MB
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- File Upload Status -->
+                                        <div id="uploadStatus" class="mt-3" style="display: none;">
+                                            <div class="alert alert-success">
+                                                <i class="fas fa-check-circle"></i>
+                                                <span id="uploadStatusText">File selected successfully!</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Legal Notice -->
+                                        <div class="alert alert-info mt-3">
+                                            <h6 class="alert-heading">
+                                                <i class="fas fa-shield-alt"></i> Certificate Privacy Notice
+                                            </h6>
+                                            <small>
+                                                Your PWD certificate will be kept strictly confidential and used only for verification purposes. 
+                                                This information is protected under disability privacy laws and will not be shared with unauthorized parties.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- General Accommodation Details -->
+                                <div class="mt-4">
+                                    <!-- MODIFIED: Added microphone button for textarea -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label fw-bold">Additional Accommodation Details</label>
+                                        <button type="button" class="btn btn-success btn-sm" onclick="startSpeechToText('accommodationDetailsTextarea')" id="accommodationMicBtn">
+                                            <i class="fas fa-microphone"></i> <span id="accommodationMicText">Speak</span>
+                                        </button>
+                                    </div>
+                                    <textarea class="form-control" name="accommodation_details" id="accommodationDetailsTextarea" rows="4" placeholder="Please provide any additional details about accommodations you need... (or use the microphone to speak)"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Legal Framework -->
+                            <div class="mt-4">
+                                <div class="card border-secondary">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Legal Framework Questions</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Can you perform the essential functions of this job with or without accommodations?</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="can_perform" value="yes" id="perform_yes">
+                                                <label class="form-check-label" for="perform_yes">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="can_perform" value="no" id="perform_no">
+                                                <label class="form-check-label" for="perform_no">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-paper-plane"></i> Submit Application
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-lg ms-3" onclick="showBasicSection()">
+                                    <i class="fas fa-arrow-left"></i> Back to Basic Info
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Speech-to-Text Status Modal -->
+        <div class="modal fade" id="speechModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-microphone"></i> Speech-to-Text Active
+                        </h5>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="mb-3">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Listening...</span>
+                            </div>
+                        </div>
+                        <h5 id="speechStatus">Listening... Please speak clearly</h5>
+                        <p class="text-muted">Your speech will appear in the text field automatically</p>
+                        <div class="mt-3">
+                            <button class="btn btn-danger" onclick="stopSpeechToText()">
+                                <i class="fas fa-stop"></i> Stop Listening
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Form navigation functions (existing code)
+    function showDisabilitySection() {
+        document.getElementById('section1').style.display = 'none';
+        document.getElementById('section2').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    function showBasicSection() {
+        document.getElementById('section2').style.display = 'none';
+        document.getElementById('section1').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    function toggleDisabilityDetails() {
+        const checkboxes = document.querySelectorAll('input[name="disability_type"]');
+        const detailsContainer = document.getElementById('disabilityDetails');
+        
+        // Check if any disability is selected
+        const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+        
+        if (anyChecked) {
+            detailsContainer.style.display = 'block';
+            
+            // Show/hide specific sections based on ALL selected disabilities
+            document.getElementById('visualDetails').style.display = 
+                document.getElementById('visual').checked ? 'block' : 'none';
+                
+            document.getElementById('mobilityDetails').style.display = 
+                document.getElementById('mobility').checked ? 'block' : 'none';
+                
+            document.getElementById('auditoryDetails').style.display = 
+                document.getElementById('auditory').checked ? 'block' : 'none';
+                
+            document.getElementById('speechDetails').style.display = 
+                document.getElementById('speech').checked ? 'block' : 'none';
+                
+            document.getElementById('cognitiveDetails').style.display = 
+                document.getElementById('cognitive').checked ? 'block' : 'none';
+        } else {
+            detailsContainer.style.display = 'none';
+        }
+    }
+
+    // Speech-to-Text functionality
+    let recognition = null;
+    let currentTargetField = null;
+    let isListening = false;
+
+    function initializeSpeechRecognition() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            recognition.onstart = function() {
+                isListening = true;
+                updateMicrophoneButtonState(currentTargetField, true);
+                showSpeechModal();
+                updateSpeechStatus('Listening... Please speak clearly');
+            };
+            
+            recognition.onresult = function(event) {
+                let finalTranscript = '';
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                if (currentTargetField) {
+                    const field = document.getElementById(currentTargetField);
+                    if (finalTranscript) {
+                        // Append final transcript to existing text
+                        const currentText = field.value;
+                        field.value = currentText + (currentText ? ' ' : '') + finalTranscript;
+                        updateSpeechStatus('Text added! Continue speaking or click Stop');
+                    } else if (interimTranscript) {
+                        updateSpeechStatus(`Hearing: "${interimTranscript}"`);
+                    }
+                }
+            };
+            
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                updateSpeechStatus('Error: ' + event.error);
+                setTimeout(stopSpeechToText, 2000);
+            };
+            
+            recognition.onend = function() {
+                isListening = false;
+                updateMicrophoneButtonState(currentTargetField, false);
+                hideSpeechModal();
+                currentTargetField = null;
+            };
+        }
+    }
+
+    function startSpeechToText(targetFieldId) {
+        if (!recognition) {
+            initializeSpeechRecognition();
+        }
+        
+        if (!recognition) {
+            alert('Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.');
+            return;
+        }
+        
+        if (isListening) {
+            stopSpeechToText();
+            return;
+        }
+        
+        currentTargetField = targetFieldId;
+        try {
+            recognition.start();
+        } catch (error) {
+            console.error('Error starting speech recognition:', error);
+            alert('Unable to start speech recognition. Please check your microphone permissions.');
+        }
+    }
+
+    function stopSpeechToText() {
+        if (recognition && isListening) {
+            recognition.stop();
+        }
+    }
+
+    function updateMicrophoneButtonState(fieldId, listening) {
+        const buttons = {
+            'coverLetterTextarea': { btn: 'coverLetterMicBtn', text: 'coverLetterMicText' },
+            'accommodationDetailsTextarea': { btn: 'accommodationMicBtn', text: 'accommodationMicText' },
+            'fullNameInput': null,
+            'phoneInput': null
+        };
+        
+        if (buttons[fieldId] && buttons[fieldId].btn) {
+            const btn = document.getElementById(buttons[fieldId].btn);
+            const text = document.getElementById(buttons[fieldId].text);
+            
+            if (listening) {
+                btn.className = 'btn btn-danger btn-sm me-2';
+                text.textContent = 'Stop';
+            } else {
+                btn.className = 'btn btn-success btn-sm me-2';
+                text.textContent = 'Speak';
+            }
+        }
+        
+        // Handle input group buttons
+        const field = document.getElementById(fieldId);
+        if (field && field.parentNode.classList.contains('input-group')) {
+            const micBtn = field.parentNode.querySelector('button');
+            if (micBtn) {
+                if (listening) {
+                    micBtn.className = 'btn btn-danger';
+                    micBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                } else {
+                    micBtn.className = 'btn btn-outline-success';
+                    micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                }
+            }
+        }
+    }
+
+    function showSpeechModal() {
+        const modal = new bootstrap.Modal(document.getElementById('speechModal'));
+        modal.show();
+    }
+
+    function hideSpeechModal() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('speechModal'));
+        if (modal) {
+            modal.hide();
+        }
+    }
+
+    function updateSpeechStatus(status) {
+        const statusElement = document.getElementById('speechStatus');
+        if (statusElement) {
+            statusElement.textContent = status;
+        }
+    }
+
+    function clearText(fieldId) {
+        document.getElementById(fieldId).value = '';
+    }
+
+    // PWD Certificate file validation
+    function validatePDFFile(input) {
+        const file = input.files[0];
+        const messageDiv = document.getElementById('fileValidationMessage');
+        const statusDiv = document.getElementById('uploadStatus');
+        const statusText = document.getElementById('uploadStatusText');
+        
+        // Hide previous messages
+        messageDiv.style.display = 'none';
+        statusDiv.style.display = 'none';
+        
+        if (!file) {
+            return;
+        }
+        
+        // Check file type
+        if (file.type !== 'application/pdf') {
+            showFileError('Invalid file type. Please select a PDF file only.');
+            input.value = ''; // Clear the invalid file
+            return;
+        }
+        
+        // Check file size (5MB = 5 * 1024 * 1024 bytes)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            showFileError('File size too large. Please select a PDF file smaller than 5MB.');
+            input.value = ''; // Clear the invalid file
+            return;
+        }
+        
+        // File is valid
+        showFileSuccess(file);
+    }
+
+    function showFileError(message) {
+        const messageDiv = document.getElementById('fileValidationMessage');
+        messageDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>File Error:</strong> ${message}
+            </div>
+        `;
+        messageDiv.style.display = 'block';
+    }
+
+    function showFileSuccess(file) {
+        const statusDiv = document.getElementById('uploadStatus');
+        const statusText = document.getElementById('uploadStatusText');
+        
+        const fileSize = (file.size / 1024 / 1024).toFixed(2); // Convert to MB
+        statusText.innerHTML = `
+            <strong>File uploaded successfully!</strong><br>
+            <small>📄 ${file.name} (${fileSize} MB)</small>
+        `;
+        statusDiv.style.display = 'block';
+        
+        // Optional: Show file preview info
+        console.log('PWD Certificate uploaded:', {
+            name: file.name,
+            size: fileSize + ' MB',
+            type: file.type,
+            lastModified: new Date(file.lastModified).toLocaleDateString()
+        });
+    }
+
+    // Initialize speech recognition on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeSpeechRecognition();
+    });
+
+    // Keyboard shortcuts for speech-to-text
+    document.addEventListener('keydown', function(event) {
+        // Ctrl + M to start speech-to-text for focused textarea
+        if (event.ctrlKey && event.key.toLowerCase() === 'm') {
+            event.preventDefault();
+            const focused = document.activeElement;
+            if (focused.tagName === 'TEXTAREA' || focused.tagName === 'INPUT') {
+                startSpeechToText(focused.id);
+            }
+        }
+    });
+
+    // Prevent form submission if PWD certificate is not uploaded
+    document.getElementById('applicationForm').addEventListener('submit', function(e) {
+        const pwdCertificate = document.getElementById('pwdCertificateInput');
+        
+        if (!pwdCertificate.files[0]) {
+            e.preventDefault();
+            alert('Please upload your PWD certificate (PDF format) before submitting the application.');
+            pwdCertificate.focus();
+            return false;
+        }
+        
+        // Additional validation for file type
+        if (pwdCertificate.files[0].type !== 'application/pdf') {
+            e.preventDefault();
+            alert('PWD certificate must be in PDF format only.');
+            pwdCertificate.focus();
+            return false;
+        }
+    });
+    </script>
+
+    <!-- CSS styling for speech-to-text and file upload -->
+    <style>
+        /* Microphone button styling */
+        .btn:focus {
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        
+        .input-group .btn {
+            border-left: 1px solid #ced4da;
+        }
+        
+        .text-to-speech-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Listening indicator */
+        .listening-active {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Modal styling */
+        .modal-content {
+            border-radius: 10px;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+</body>
+</html>

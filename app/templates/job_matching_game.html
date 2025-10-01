@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Matching Game - PWD Job Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .match-card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+        .match-card:hover {
+            transform: translateY(-5px);
+        }
+        .match-score {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .action-buttons .btn {
+            border-radius: 25px;
+            padding: 10px 30px;
+            font-weight: bold;
+        }
+        .back-navigation {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">PWD Job Portal</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+                <a class="nav-link" href="{{ url_for('main.my_matches') }}">My Matches</a>
+                <a class="nav-link" href="{{ url_for('main.my_applications') }}">Applications</a>
+                <a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a>
+                <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Back Navigation Section -->
+        <div class="back-navigation">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <button onclick="goBack()" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Go Back
+                    </button>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('main.my_matches') }}" class="btn btn-outline-success me-2">
+                        <i class="fas fa-heart"></i> My Matches
+                    </a>
+                    <a href="{{ url_for('main.jobs') }}" class="btn btn-outline-info">
+                        <i class="fas fa-search"></i> Browse All Jobs
+                    </a>
+                </div>
+                <div class="text-muted">
+                    <small>🎯 Job Matching Game</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mb-4">
+            <h2>🎯 Job Matching Game</h2>
+            <p class="lead">Swipe through personalized job matches</p>
+            <div class="progress" style="height: 10px;">
+                <div class="progress-bar" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <small class="text-muted">{{ total_matches }} matches found</small>
+        </div>
+
+        {% if current_match %}
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card match-card">
+                        <div class="card-header bg-success text-white text-center">
+                            <div class="match-score">{{ "%.0f"|format(current_match.match_score) }}% Match</div>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title">{{ current_match.job.title }}</h3>
+                            <h5 class="text-muted mb-3">{{ current_match.job.company }}</h5>
+                            
+                            <div class="mb-3">
+                                <p class="card-text">{{ current_match.job.description[:200] }}...</p>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <small class="text-muted"><strong>Location:</strong></small><br>
+                                    <span>{{ current_match.job.location }}</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted"><strong>Salary:</strong></small><br>
+                                    <span>{{ current_match.job.salary_range }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Match Details -->
+                            <div class="mb-3">
+                                <h6>Why this matches you:</h6>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <small class="text-muted">Skills Match:</small>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-info" style="width: {{ current_match.skills_match }}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Experience Match:</small>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-warning" style="width: {{ current_match.experience_match }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="action-buttons text-center">
+                                <div class="btn-group w-100" role="group">
+                                    <a href="{{ url_for('main.match_action', match_id=current_match.id, action='pass') }}" 
+                                       class="btn btn-outline-danger">❌ Pass</a>
+                                    <a href="{{ url_for('main.job_detail', id=current_match.job.id) }}" 
+                                       class="btn btn-outline-info">👁️ View Details</a>
+                                    <a href="{{ url_for('main.match_action', match_id=current_match.id, action='like') }}" 
+                                       class="btn btn-outline-success">❤️ Like</a>
+                                    <a href="{{ url_for('main.match_action', match_id=current_match.id, action='apply') }}" 
+                                       class="btn btn-primary">🚀 Apply</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>🎉 Great job! You've reviewed all available matches</h3>
+                        <p class="lead">Check your liked jobs and applications in your matches section</p>
+                        <div class="mt-3">
+                            <a href="{{ url_for('main.my_matches') }}" class="btn btn-primary me-2">View My Matches</a>
+                            <a href="{{ url_for('main.jobs') }}" class="btn btn-outline-primary me-2">Browse All Jobs</a>
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <script>
+        function goBack() {
+            // Check if there's previous history, otherwise go to dashboard
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = "{{ url_for('main.dashboard') }}";
+            }
+        }
+    </script>
+</body>
+</html>
