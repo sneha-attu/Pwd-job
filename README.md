@@ -1,52 +1,52 @@
-🚀 PWD Job Portal - Accessible Employment Platform
+# 🚀 PWD Job Portal - Accessible Employment Platform
+
 An accessible job portal designed to connect Persons with Disabilities (PWD) with inclusive employers, providing assistive features that ensure equal access to job opportunities.
 
-♿ Accessibility Features
+---
 
-Visual support: Voice navigation, screen reader-friendly templates, high contrast UI
+## ♿ Accessibility Features
 
-Auditory support: Speech-to-text and text-to-speech features
+- *Visual support*: Voice navigation, screen reader-friendly templates, high contrast UI  
+- *Auditory support*: Speech-to-text and text-to-speech features (browser-based)  
+- *Motor support*: Full keyboard navigation, large and simple UI controls  
+- *Speech support*: Voice input for search and navigation  
+- *Cognitive support*: Simplified navigation and content structure  
 
-Motor support: Full keyboard navigation, large and simple UI controls
+---
 
-Speech support: Voice input for search and navigation
+## 🛠 Technology Stack
 
-Cognitive support: Simplified navigation and content structure
+- *Backend*: Python 3.12, Flask, Flask-SQLAlchemy  
+- *Database*: SQLite (default) | PostgreSQL (via DATABASE_URL)  
+- *Authentication*: Flask-Login (role-based: Jobseeker & Employer)  
+- *Forms*: Flask-WTF + WTForms  
+- *Frontend*: Jinja2 (templating), Bootstrap 5, HTML5, CSS3, JavaScript  
+- *Accessibility Tools*: Web Speech API (browser-side voice input/output)  
+- *Deployment*: Gunicorn (WSGI server)  
 
-🛠 Technology Stack
+---
 
-Backend: Python 3.12, Flask, Flask-SQLAlchemy
+## 🚀 Quick Start
 
-Database: SQLite (default) | PostgreSQL (via DATABASE_URL)
-
-Authentication: Flask-Login (role-based: Jobseeker & Employer)
-
-Forms: Flask-WTF + WTForms
-
-Frontend: Jinja2 templates, Bootstrap 5, HTML5, CSS3, JavaScript
-
-Accessibility Tools: SpeechRecognition (STT), pyttsx3 (TTS), Web Speech API
-
-Deployment Ready: Gunicorn (WSGI server)
-
-🚀 Quick Start
-1. Clone the repository
+### 1. Clone the repository
+```bash
 git clone https://github.com/<your-username>/pwd-job-portal.git
 cd pwd-job-portal
 
-2. Create virtual environment & install dependencies
+Create virtual environment & install dependencies
 python3 -m venv venv
 source venv/bin/activate   # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements.txt 
 
-3. Run database migrations
+Run database migrations
 python migrate_db.py
 
-4. Start the server
+Start the server
 python run.py
 
 
-App runs at 👉 http://127.0.0.1:5000
+App will be running at 👉 http://127.0.0.1:5000
+
 
 👥 Demo Accounts
 Jobseeker
@@ -61,7 +61,8 @@ Email: demo@employer.com
 
 Password: demo123
 
-📂 Project Structure
+Project Structure
+
 pwdjob/
 │── app/
 │   ├── _init_.py        # App factory
